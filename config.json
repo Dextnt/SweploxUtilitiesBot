@@ -1,0 +1,57 @@
+{
+  "config": {
+    "verifiedchannel": "verified",
+    "defaultrole": "member",
+    "botid": "ODU0NDk2MTgwNjY1NTgxNTk4.YMkxlQ.DA6CekO5JJVLOisxQCbeGKtPplM"
+  },
+  "messages": {
+    "nitrocolorusage": "**Usage:** .nitrocolor ``set`` ``\u003ccolour in hex\u003e`` OR ``remove`` \n**Required:** {{permittedroles}}",
+    "verifiedinverifiedchannel": "{{affecteduserbymention}} has been verified by {{sender}} \n At: {{currenttime}} , Reason: {{genericreason}}",
+    "nitrocolorinvalidhex": "**Invalid HEX Code**\n**Example format:** .nitrocolor ``set`` FFFFFF",
+    "lackofpermissions": "**You don\u0027t have the permission to execute that command**\nRequired: {{permittedroles}}",
+    "nitrocolorsuccess": "**Nitro color changed!**",
+    "nitrocolornotfound": "**You don\u0027t have a nitro color!**",
+    "verified": "{{affecteduserbymention}} has been verified by {{sender}}",
+    "verifiedusage": "**Usage:** .verify [user] [reason] \n**Required:** {{permittedroles}}",
+    "nitrocolorremoved": "**Nitro color successfully removed!**",
+    "nitrocolornewrolesuccess": "**NitroColor role granted!**",
+    "nitrocolorduplicate": "**You already have that nitro color!**"
+  },
+  "permissions": {
+    "nitrocolor.remove": [
+      "Nitro Booster"
+    ],
+    "nitrocolor.forceupdate": [
+      "Administrator",
+      "Owner"
+    ],
+    "nitrocolor.adminremove": [
+      "Administrator",
+      "Owner"
+    ],
+    "defaultjson": [
+      "Administrator",
+      "Owner"
+    ],
+    "verify": [
+      "Administrator",
+      "Moderator",
+      "Owner",
+      "Nebula"
+    ],
+    "nitrocolor.set": [
+      "Nitro Booster"
+    ],
+    "nitrocolor.adminset": [
+      "Admin",
+      "Owner"
+    ],
+    "reloadjson": [
+      "Administrator",
+      "Owner"
+    ]
+  },
+  "help": {
+    "help": "**__Sweplox Utilities Help__**\n\nSweploxUtilities ver. 1.0, written by Dextnt\nhttps://github.com/asdpoafomkasd\n\n**Commands list:**\n\n\u003e `.verify` - Used by staff to verify a new member into the server\n__Usage:__  ``.verify``  ``@User``\n\n\n\u003e `.nitrocolor` - Used by members with the Nitro Booster role to claim or remove their color\n__Usage:__  ``.nitrocolor / .nc`` ``remove`` OR ``set`` ``color in hex``\n\n\n\u003e `.help` - The command you\u0027re using right now\n__Usage:__  ``.help`` \n\n\n\u003e `.adminnitrocolor` - Used by admin to change and remove other members nitro colors \n__Usage:__  ``.adminnitrocolor / .nc`` ``remove`` ``@User``  OR  ``set`` ``@User`` ``color in hex``\n\n\n\u003e `.move` - Used to move one or multiple users to another voice channel \n__Usage:__  ``.move / .mv`` ``channel`` ``@User`` ``@User`` (Up to 5 users)\n\n\n\u003e `.movemyself` - Used to move yourself + one or multiple users to another voice channel \n__Usage:__  ``.movemyself / .mvm`` ``channel`` ``@User`` ``@User`` (Up to 5 users)\n\n**Upcoming features**\n\n``.ChangeBackground``\n\n``\"Active channels\"``\n\n``.AutoResponder``"
+  }
+}
