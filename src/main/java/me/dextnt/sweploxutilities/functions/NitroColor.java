@@ -24,7 +24,6 @@ import me.dextnt.sweploxutilities.config.NitroColorJSON;
 import me.dextnt.sweploxutilities.config.ReadJSON;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.requests.restaction.RoleAction;
 
 /**
  *
@@ -139,6 +138,19 @@ public class NitroColor {
 
     private void remove(GuildMessageReceivedEvent event) {
 
+        ManageJSON manageJson = new ManageJSON();
+
+        try {
+            if (!manageJson.userIsPermitted(event, event.getAuthor().getId(), "nitrocolor.remove")) { //Check for permissions
+                ReadJSON.read("messages", "lackofpermissions", event);
+                return;
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
+            return;
+        }
+
         load();
 
         Map<String, String> colorMap = new HashMap() {
@@ -149,7 +161,7 @@ public class NitroColor {
 
             json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
             json = json.replaceAll(":", " ");
-            json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
+            json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regular expressions let me be
             String[] filteredjson = json.split(" ");
 
             String user = String.valueOf(event.getAuthor().getIdLong());
@@ -226,6 +238,19 @@ public class NitroColor {
 
     private void remove(GuildMessageReceivedEvent event, String User) {
 
+        ManageJSON manageJson = new ManageJSON();
+
+        try {
+            if (!manageJson.userIsPermitted(event, event.getAuthor().getId(), "nitrocolor.adminremove")) { //Check for permissions
+                ReadJSON.read("messages", "lackofpermissions", event);
+                return;
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
+            return;
+        }
+
         load();
 
         Map<String, String> colorMap = new HashMap() {
@@ -296,7 +321,20 @@ public class NitroColor {
     }
 
     private void update(GuildMessageReceivedEvent event) {
+        
+        ManageJSON manageJson = new ManageJSON();
 
+        try {
+            if (!manageJson.userIsPermitted(event, event.getAuthor().getId(), "nitrocolor.forceupdate")) { //Check for permissions
+                ReadJSON.read("messages", "lackofpermissions", event);
+                return;
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
+            return;
+        }
+        
         load();
 
         String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
@@ -391,6 +429,19 @@ public class NitroColor {
 
     private void set(GuildMessageReceivedEvent event) {
 
+        ManageJSON manageJson = new ManageJSON();
+
+        try {
+            if (!manageJson.userIsPermitted(event, event.getAuthor().getId(), "nitrocolor.set")) { //Check for permissions
+                ReadJSON.read("messages", "lackofpermissions", event);
+                return;
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
+            return;
+        }
+        
         load();
 
         Map<String, String> colorMap = new HashMap() {
@@ -450,7 +501,6 @@ public class NitroColor {
 
         colorMap.put(event.getAuthor().getId(), HEX);
 
-        System.out.println(colorMap.toString());
 
         try {
 
@@ -476,6 +526,19 @@ public class NitroColor {
 
     private void set(GuildMessageReceivedEvent event, String User) {
 
+        ManageJSON manageJson = new ManageJSON();
+
+        try {
+            if (!manageJson.userIsPermitted(event, event.getAuthor().getId(), "nitrocolor.adminset")) { //Check for permissions
+                ReadJSON.read("messages", "lackofpermissions", event);
+                return;
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
+            return;
+        }
+        
         load();
 
         User = User.substring(3, 21); //Converts the userid into valid snowflake
@@ -491,18 +554,13 @@ public class NitroColor {
             json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
             String[] filteredjson = json.split(" ");
 
-            for (String s : filteredjson) {
-                System.out.println(s);
-            }
-
             for (int i = 0; i < filteredjson.length; i = i + 2) {
 
                 colorMap.put(filteredjson[i], (filteredjson[i + 1]));
-                System.out.println("filteeded: " + filteredjson[i] + (filteredjson[i + 1]));
             }
 
         } catch (Exception e) {
-            System.out.println("wherewewe" + e);
+ 
         }
 
         String[] HEXArray = event.getMessage().getContentRaw().split(" ");
@@ -518,7 +576,6 @@ public class NitroColor {
 
         String HEX = HEXArray[3].replaceAll("#", "");
 
-        System.out.println("hexehx:" + HEX);
 
         if (!HEX.matches("[0-9a-fA-F]{6}")) {
             ReadJSON.read("messages", "nitrocolorinvalidhex", event);
@@ -530,8 +587,6 @@ public class NitroColor {
         }
 
         colorMap.put(User, HEX);
-
-        System.out.println(colorMap.toString());
 
         try {
 

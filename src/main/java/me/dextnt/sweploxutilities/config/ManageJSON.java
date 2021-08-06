@@ -34,25 +34,40 @@ public class ManageJSON {
 
         Map<String, String> configMap = new HashMap() {
             {
+                put("logchannel", "logs");
                 put("verifiedchannel", "verified");
                 put("defaultrole", "member");
-                put("botid", "ODU0NDk2MTgwNjY1NTgxNTk4.YMkxlQ.DA6CekO5JJVLOisxQCbeGKtPplM");
+                put("unverifiedrole", "unverified");
+                put("botid", "");
             }
         };
 
         Map<String, String> messageMap = new HashMap() {
             {
-                put("lackofpermissions", "**You don't have the permission to execute that command**\nRequired: {{permittedroles}}");
+                put("lackofpermissions", "**You don't have the permission to execute that command**");
                 put("verified", "{{affecteduserbymention}} has been verified by {{sender}}");
                 put("verifiedinverifiedchannel", "{{affecteduserbymention}} has been verified by {{sender}} \n At: {{currenttime}} , Reason: {{genericreason}}");
-                put("verifiedusage", "**Usage:** .verify [user] [reason] \n**Required:** {{permittedroles}}");
-                put("nitrocolorusage", "**Usage:** .nitrocolor ``set`` ``<colour in hex>`` OR ``remove`` \n**Required:** {{permittedroles}}");
+                put("verifiedusage", "**Usage:** .verify ``user`` ``reason`` \n");
+                put("nitrocolorusage", "**Usage:** .nitrocolor ``set`` ``<colour in hex>`` OR ``remove`` \n");
                 put("nitrocolorinvalidhex", "**Invalid HEX Code**\n**Example format:** .nitrocolor ``set`` FFFFFF");
                 put("nitrocolorsuccess", "**Nitro color changed!**");
                 put("nitrocolornewrolesuccess", "**NitroColor role granted!**");
                 put("nitrocolorremoved", "**Nitro color successfully removed!**");
                 put("nitrocolornotfound", "**You don't have a nitro color!**");
                 put("nitrocolorduplicate", "**You already have that nitro color!**");
+                put("adminmovesetduplicate", "**That channel has already been set!**");
+                put("adminmoveinvalidinput", "**Invalid aliases input! String `` {{invalidinput}} `` will not be saved!**\n Disallowed characters: ``\" , : { } ¤ ``");
+                put("adminmoveinvalidchannelid", "**Invalid Channel ID!**\nRight click a channel -> Copy ID, to get a correct ID!");
+                put("adminmoveusage", "**Usage:** ``.adminmove / .amv``  ``set``  ``ChannelID``  ``Alias``  ``Alias``  ``etc..``  OR  ``remove``  ``ChannelID``  OR  ``list``");
+                put("movecommandtoomanymembers","**You can not select more than 5 users (including yourself) at once**");
+                put("movecommandsuccess","**User(s) {{extrainfo}} successfully moved!**");
+                put("movecommandsuccesslog","**User(s) {{extrainfo}} moved:** \n**At** {{currenttime}} , **By** {{sender}}");
+                put("movecommandlackofpermissions", "**You don't have access to join that channel!**");
+                put("movecommandinvalidalias","**Invalid channel alias!**");
+                put("genericnochanges","**No changes have been made**");
+                put("movecommandremovesuccess","**Channel `` {{extrainfo}} `` has been successfully removed!**");
+                put("movecommandsetsuccess","**Channel `` {{extrainfo}} `` has been successfully set!**");
+                put("movecommandusage", "**Usage:** .move ``channel`` ``@User`` ``@User`` ``etc..`` (Up to 5 users)");
             }
         };
 
@@ -66,6 +81,10 @@ public class ManageJSON {
                 put("nitrocolor.adminset", new String[]{"Admin", "Owner"});
                 put("nitrocolor.adminremove", new String[]{"Administrator", "Owner"});
                 put("nitrocolor.forceupdate", new String[]{"Administrator", "Owner"});
+                put("movecommand.move", new String[]{"Lightweight", "Moderator", "Administrator", "Owner"});
+                put("movecommand.adminset", new String[]{"Moderator", "Administrator", "Owner"});
+                put("movecommand.adminremove", new String[]{"Moderator", "Administrator", "Owner"});
+                put("movecommand.adminlist", new String[]{"Moderator", "Administrator", "Owner"});
             }
         };
 
@@ -74,12 +93,12 @@ public class ManageJSON {
                 put("help", "**__Sweplox Utilities Help__**\n"
                         + "\n"
                         + "SweploxUtilities ver. 1.0, written by Dextnt\n"
-                        + "https://github.com/asdpoafomkasd\n"
+                        + "<https://github.com/Dextnt/SweploxUtilitiesBot>\n"
                         + "\n"
                         + "**Commands list:**\n"
                         + "\n"
                         + "> `.verify` - Used by staff to verify a new member into the server\n"
-                        + "__Usage:__  ``.verify``  ``@User``\n"
+                        + "__Usage:__  ``.verify``  ``@User`` ``reason``\n"
                         + "\n"
                         + "\n"
                         + "> `.nitrocolor` - Used by members with the Nitro Booster role to claim or remove their color\n"
@@ -91,15 +110,11 @@ public class ManageJSON {
                         + "\n"
                         + "\n"
                         + "> `.adminnitrocolor` - Used by admin to change and remove other members nitro colors \n"
-                        + "__Usage:__  ``.adminnitrocolor / .nc`` ``remove`` ``@User``  OR  ``set`` ``@User`` ``color in hex``\n"
+                        + "__Usage:__  ``.adminnitrocolor / .anc`` ``remove`` ``@User``  OR  ``set`` ``@User`` ``color in hex``\n"
                         + "\n"
                         + "\n"
                         + "> `.move` - Used to move one or multiple users to another voice channel \n"
-                        + "__Usage:__  ``.move / .mv`` ``channel`` ``@User`` ``@User`` (Up to 5 users)\n"
-                        + "\n"
-                        + "\n"
-                        + "> `.movemyself` - Used to move yourself + one or multiple users to another voice channel \n"
-                        + "__Usage:__  ``.movemyself / .mvm`` ``channel`` ``@User`` ``@User`` (Up to 5 users)\n"
+                        + "__Usage:__  ``.move / .mv`` ``channel`` ``@User`` ``@User`` (Up to 5 users, including yourself)\n"
                         + "\n"
                         + "**Upcoming features**\n"
                         + "\n"
@@ -127,8 +142,9 @@ public class ManageJSON {
             System.out.println("<SWEPLOX UTILITIES> Searching for config.json");
             String failCheck = new FileReader("config.json").toString();
         } catch (FileNotFoundException e) {
-            System.out.println("<SWEPLOX UTILITIES> config.json not found, generating new");
-
+            System.out.println("<SWEPLOX UTILITIES> config.json not found, generating new"
+                    + "\n\n<SWEPLOX UTILITIES> If this is your initial startup make sure to set your BotID in the config!\n");
+            
             try {
                 writeDefault();
                 return;
@@ -229,7 +245,7 @@ public class ManageJSON {
 
             ConvertJSON convert = new ConvertJSON();
 
-            return convert.toString(pageName, event);
+            return convert.toString(pageName, event, "");
 
         } catch (FileNotFoundException e) {
             System.out.println("JSON EXCEPTION: " + e);
@@ -242,7 +258,7 @@ public class ManageJSON {
 
     }
 
-    public String readLineString(String JSONobject, String JSONvalue) throws NullPointerException {
+    public String readLineString(String JSONobject, String JSONvalue) throws NullPointerException { //Only used by main class
 
         String pageName;
 
@@ -254,6 +270,40 @@ public class ManageJSON {
 
         } catch (FileNotFoundException e) {
             System.out.println("JSON EXCEPTION @ readLineString: " + e);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return null;
+
+    }
+    
+        /**
+     * Used to get a string ready to be sent in a discord chat, reads from
+     * config
+     *
+     * @param JSONobject Object in ConfigJSON, example "Person"
+     * @param JSONvalue Value in said object, example "Age"
+     * @param event GuildMessageRecivedEvent, used to calculate tags
+     * @param extraInfo Extra information that you want to be included in the converted message
+     * @return String ready to be sent in rawtext
+     * @throws java.io.FileNotFoundException
+     */
+    public String readLineString(String JSONobject, String JSONvalue, GuildMessageReceivedEvent event, String extraInfo) throws FileNotFoundException, NullPointerException {
+
+        String pageName;
+
+        try {
+
+            pageName = getJSON().getAsJsonObject(JSONobject).get(JSONvalue).getAsString();
+
+            ConvertJSON convert = new ConvertJSON();
+
+            return convert.toString(pageName, event, extraInfo);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("JSON EXCEPTION: " + e);
 
         } catch (Exception e) {
             System.out.println(e);

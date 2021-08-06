@@ -16,8 +16,10 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 public class Test {
 
     public static void run(GuildMessageReceivedEvent event) {
-
-        ReadJSON.read("amous", " ", event);
+        
+        MoveCommand owo = new MoveCommand();
+        
+        owo.move(event);
 
     }
 

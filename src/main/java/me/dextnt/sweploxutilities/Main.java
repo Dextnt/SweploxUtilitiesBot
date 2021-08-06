@@ -19,7 +19,6 @@ public class Main {
         try {
         ManageJSON json = new ManageJSON();
         json.startUpCheck();
-        
         Listener.run(json.readLineString("config", "botid"));
         } catch (LoginException e) {
             System.out.println("<SWEPLOX UTILITIES> Error at STARTUP: " + e);

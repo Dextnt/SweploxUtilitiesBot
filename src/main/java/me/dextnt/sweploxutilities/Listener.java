@@ -8,6 +8,7 @@ package me.dextnt.sweploxutilities;
 import javax.security.auth.login.LoginException;
 import me.dextnt.sweploxutilities.functions.DefaultJSON;
 import me.dextnt.sweploxutilities.functions.HelpCommand;
+import me.dextnt.sweploxutilities.functions.MoveCommand;
 import me.dextnt.sweploxutilities.functions.NitroColor;
 import me.dextnt.sweploxutilities.functions.ReloadJSON;
 import me.dextnt.sweploxutilities.functions.Test;
@@ -80,6 +81,19 @@ public class Listener extends ListenerAdapter {
             case ".help":
                 HelpCommand.run(event);
                 break;
+            case ".adminmove":
+                MoveCommand.adminrun(event);
+                break;
+            case ".amv":
+                MoveCommand.adminrun(event);
+                break;
+            case ".move":
+                MoveCommand.run(event);
+                break;
+            case ".mv":
+                MoveCommand.run(event);
+                break;
+                
         }
 
     }

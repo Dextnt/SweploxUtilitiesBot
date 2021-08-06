@@ -46,7 +46,7 @@ public class ConvertJSON {
         
     }
 
-    public String toString(String JSON, GuildMessageReceivedEvent event) {
+    public String toString(String JSON, GuildMessageReceivedEvent event, String extraInfo) {
 
         String[] filter = JSON.split(" "); //Splits all words into different pieces
 
@@ -68,8 +68,11 @@ public class ConvertJSON {
                     case "{{genericreason}}":
                         filter[i] = getGenericReason(event);
                         break;
-                    case "{{permittedroles}}":
-                        filter[i] = "[ADMIN, MODERATOR, OWNER, NEBULA, test FIXA SEN]";
+                    case "{{invalidinput}}":
+                        filter[i] = extraInfo;
+                        break;
+                    case "{{extrainfo}}":
+                        filter[i] = extraInfo;
                         break;
                     default:
                         filter[i] = "{INVALID TAG}";
@@ -88,5 +91,5 @@ public class ConvertJSON {
         return finalMessage;
 
     }
-
+    
 }

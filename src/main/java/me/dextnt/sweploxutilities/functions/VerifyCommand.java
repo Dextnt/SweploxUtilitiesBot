@@ -5,6 +5,7 @@
  */
 package me.dextnt.sweploxutilities.functions;
 
+import java.io.FileNotFoundException;
 import me.dextnt.sweploxutilities.config.ManageJSON;
 import me.dextnt.sweploxutilities.config.ReadJSON;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -30,7 +31,7 @@ public class VerifyCommand {
             
         } 
 
-        String member = msgs[1].replaceAll("\\D+", ""); //Removes the <@> on the user tag
+        String member = msgs[1].replaceAll("\\D+", ""); //Removes the <@!> from the user tag
 
         try {
 
@@ -46,16 +47,25 @@ public class VerifyCommand {
                 System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
                 return;
             }
-
-            event.getGuild().addRoleToMember(member, event.getGuild().getRolesByName(json.readLineString("config", "defaultrole", event), true).get(0)).queue();
             
+            event.getGuild().addRoleToMember(member, event.getGuild().getRolesByName(json.readLineString("config", "defaultrole", event), true).get(0)).queue();
+            try {
+            event.getGuild().removeRoleFromMember(member, event.getGuild().getRolesByName(json.readLineString("config", "unverifiedrole"), true).get(0)).queue();
+            } catch (Exception e) {     
+            }
+            
+        } catch (java.lang.IllegalArgumentException e) {
 
-        } catch (Exception e) {
-
-            event.getChannel().sendMessage(e + " @ VerifyCommand/addrole" + "\n**Did you use the right formatting?**").queue();
-            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/addrole" + "\n**Did you use the right formatting?**");
+            event.getChannel().sendMessage(e + " @ VerifyCommand/addrole" + "\n**UserID invalid, double-check your input.**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/addrole" + "\n**UserID invalid, double-check your input.**");
             return;
 
+        } catch (FileNotFoundException e) {
+            
+            event.getChannel().sendMessage(e + " @ VerifyCommand/addrole" + "\n**Bot can probably not read from config.**").queue();
+            System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/addrole" + "\n**Bot can probably not read from config.**");
+            return;
+            
         }
 
         try {
