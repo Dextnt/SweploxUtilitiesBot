@@ -40,17 +40,13 @@ public class MoveCommand {
         String arr[] = event.getMessage().getContentRaw().split(" ");
         
         if (arr.length == 1) {
-            ReadJSON.read("messages", "adminmoveusage", event);
+            ReadJSON.read("messages", "movecommandusage", event);
             return;
         }
-        
-        
         
         MoveCommand mc = new MoveCommand();
         
         mc.move(event);
-        
-        
 
     }
 
@@ -68,6 +64,9 @@ public class MoveCommand {
             return;
 
         }
+        
+        
+        
 
         MoveCommand mc = new MoveCommand();
         switch (getFunction) {
@@ -103,7 +102,6 @@ public class MoveCommand {
             JsonArray jsonArr;
 
             try {
-
 
                 jsonArr = JSONObject.getAsJsonObject().getAsJsonObject("channels").get(filteredString).getAsJsonArray();  //Gets all aliases from that ID
 
@@ -159,7 +157,7 @@ public class MoveCommand {
 
             validAlias = validAlias.substring(1, validAlias.length() - 1); //Removes spaces before and after the alias
 
-        }
+        } 
 
         int userCount = 0;
         ArrayList<String> users = new ArrayList<>();
@@ -538,9 +536,15 @@ public class MoveCommand {
 
         }
 
+        if (aliases.isEmpty()) {
+            ReadJSON.read("messages", "genericnochanges", event);
+            return;
+        }
+        
         String[] aliasesArr = new String[aliases.size()];
         channelMap.put(channelID, aliases.toArray(aliasesArr));
 
+        
         try {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

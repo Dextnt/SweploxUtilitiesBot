@@ -8,6 +8,7 @@ package me.dextnt.sweploxutilities.functions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.awt.Color;
 import java.io.FileNotFoundException;
@@ -22,6 +23,7 @@ import java.util.Map;
 import me.dextnt.sweploxutilities.config.ManageJSON;
 import me.dextnt.sweploxutilities.config.NitroColorJSON;
 import me.dextnt.sweploxutilities.config.ReadJSON;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -54,7 +56,7 @@ public class NitroColor {
                 nc.set(event);
                 break;
             case "remove":
-                nc.remove(event);
+                nc.remove(event, true);
                 break;
             case "forceupdate":
                 nc.forceupdate(event);
@@ -93,7 +95,8 @@ public class NitroColor {
             }
             case "remove":  
                 try {
-                nc.remove(event, arr[2]);
+                arr[2] = arr[2].substring(3, 21);
+                nc.remove(event, arr[2], true);
                 break;
             } catch (ArrayIndexOutOfBoundsException e) {
                 ReadJSON.read("messages", "nitrocolorusage", event);
@@ -106,12 +109,31 @@ public class NitroColor {
 
     }
 
-    private void load() {
+    private void updateJSON() {
 
         try {
             JSONObject = new JsonParser().parse(new FileReader("nitrocolor.json"));
         } catch (FileNotFoundException e) {
-            JSONObject = null;
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            try {
+
+                Writer writer = Files.newBufferedWriter(Paths.get("nitrocolor.json"));
+
+                Map<String, String> colorMap = new HashMap() {
+                };
+
+                NitroColorJSON preparedMap = new NitroColorJSON(colorMap);
+
+                gson.toJson(preparedMap, writer);
+
+                writer.close();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
         }
     }
 
@@ -136,7 +158,7 @@ public class NitroColor {
 
     }
 
-    private void remove(GuildMessageReceivedEvent event) {
+    private void remove(GuildMessageReceivedEvent event, Boolean callUpdate) {
 
         ManageJSON manageJson = new ManageJSON();
 
@@ -151,7 +173,7 @@ public class NitroColor {
             return;
         }
 
-        load();
+        updateJSON();
 
         Map<String, String> colorMap = new HashMap() {
         };
@@ -204,7 +226,10 @@ public class NitroColor {
             writer.close();
 
             deleterole(event, String.valueOf(event.getAuthor().getIdLong()));
-            update(event);
+
+            if (callUpdate) {
+                update(event);
+            }
 
             ReadJSON.read("messages", "nitrocolorremoved", event);
 
@@ -221,8 +246,6 @@ public class NitroColor {
 
         List<Role> roles = event.getGuild().getMemberById(User).getRoles();
 
-        System.out.println("");
-
         for (int i = 0; i < roles.size(); i++) {
             String[] split = roles.get(i).toString().split("[:()]");
 
@@ -236,7 +259,7 @@ public class NitroColor {
 
     }
 
-    private void remove(GuildMessageReceivedEvent event, String User) {
+    private void remove(GuildMessageReceivedEvent event, String User, Boolean callUpdate) {
 
         ManageJSON manageJson = new ManageJSON();
 
@@ -251,15 +274,11 @@ public class NitroColor {
             return;
         }
 
-        load();
+        updateJSON();
 
         Map<String, String> colorMap = new HashMap() {
         };
-
-        try {
-
-            User = User.substring(3, 21);
-
+            
             String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
 
             json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
@@ -290,9 +309,7 @@ public class NitroColor {
                 }
             }
 
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+      
 
         try {
 
@@ -305,9 +322,11 @@ public class NitroColor {
             gson.toJson(preparedMap, writer);
 
             writer.close();
-
             deleterole(event, User);
-            update(event);
+
+            if (callUpdate) {
+                update(event);
+            }
 
             ReadJSON.read("messages", "nitrocolorremoved", event);
 
@@ -321,7 +340,7 @@ public class NitroColor {
     }
 
     private void update(GuildMessageReceivedEvent event) {
-        
+
         ManageJSON manageJson = new ManageJSON();
 
         try {
@@ -334,99 +353,107 @@ public class NitroColor {
             System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
             return;
         }
+
         
-        load();
+        
+        
+        List<Member> totMembers = event.getGuild().getMembers();
 
-        String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
+        for (int i = 0; i < totMembers.size(); i++) {
 
-        boolean messageSent = false;
+            List<Role> roles = totMembers.get(i).getRoles();
 
-        json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
-        json = json.replaceAll(":", " ");
-        json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
+            Boolean nitroColor = false;
+            Boolean nitroBooster = false;
+            String nitroColorID = "";
+            String userID = totMembers.get(i).getId();
 
-        if (json.equalsIgnoreCase("")) {
-            System.out.println("<SWEPLOX UTILITIES> NitroColor list is empty, won't execute NitroColor.update()");
-            return;
-        }
+            for (int x = 0; x < roles.size(); x++) { //Goes through all the members roles
 
-        String[] filteredJson = json.split(" ");
+                Role currentRole = roles.get(x);
+                String name = currentRole.getName();
 
-        for (int i = 0; i < filteredJson.length; i = i + 2) {
-
-            boolean rolecheck = false; //Check if you need to create the NitroColor role
-
-            try {
-
-                List<Role> roles = event.getGuild().getMemberById(filteredJson[i]).getRoles(); //Gets list of all roles from the current member in the nitrocolor list
-
-                for (int x = 0; x < roles.size(); x++) {
-
-                    String[] split = roles.get(x).toString().split("[:()]"); //Removes splits the roles at : ( and )
-
-                    if (split[1].equalsIgnoreCase("NitroColor")) {
-
-                        rolecheck = true;
-
-                        Color clr = event.getGuild().getRoleById(split[2]).getColor();
-                        String hex;
-
-                        if (clr != null) { //Checks that the role has a colour
-                            hex = String.format("%02x%02x%02x", clr.getRed(), clr.getGreen(), clr.getBlue()); //Converts color value from decimal to hex
-                        } else {
-                            hex = "";
-                        }
-
-                        if (!hex.equalsIgnoreCase(filteredJson[i + 1])) {
-
-                            int hexindecimal = Integer.parseInt(filteredJson[i + 1], 16); //converts it back
-                            event.getGuild().getRoleById(split[2]).getManager().setColor(hexindecimal).queue(); //Sets the colour
-
-                            if (!messageSent) {
-                                ReadJSON.read("messages", "nitrocolorsuccess", event);
-                                messageSent = true;
-                            }
-
-                        }
-
-                    }
-
+                if (name.equals("NitroColor")) {
+                    System.out.println(event.getGuild().getMemberById(userID).getEffectiveName() + " HAS NITROCOLOR");
+                    nitroColor = true;
+                    nitroColorID = currentRole.getId();
                 }
 
-            } catch (Exception e) {
-
-                System.out.println("<SWEPLOX UTILITIES> " + e + " @ Nitrocolor/update/changerolecolour" + "\n**Check nitrocolor.json**");
-                event.getChannel().sendMessage(e + " @ Nitrocolor/update/changerolecolour" + "\n**Check nitrocolor.json**").queue();
+                if (name.equals("Nitro Booster")) {
+                    System.out.println(event.getGuild().getMemberById(userID).getEffectiveName() + " HAS NITRO BOOSTER");
+                    nitroBooster = true;
+                }
 
             }
 
-            if (!rolecheck) {
+            updateJSON();
+            JsonObject json = JSONObject.getAsJsonObject().getAsJsonObject("nitrocolor");
 
-                event.getGuild().modifyRolePositions(true).queue();
+            if (nitroColor && !nitroBooster) {
 
-                final String filteredJsonButFinal = filteredJson[i];
+                System.out.println("1");
+                remove(event, userID, false);
+
+            } else if (!nitroColor && nitroBooster) {
+
+                try {
+                    String crashTest = json.get(userID).getAsString();
+                } catch (NullPointerException e) {
+                    continue;
+                }
+
+                final String HEX = json.get(userID).getAsString();
+                final String finalUserID = userID;
 
                 event.getGuild().createRole()
                         .setName("NitroColor")
-                        .setColor(Integer.parseInt(filteredJson[i + 1], 16))
+                        .setColor(Integer.parseInt(HEX, 16))
                         .setMentionable(false)
                         .setPermissions()
                         .queue(Role -> {
 
+                            event.getGuild().modifyRolePositions(true).queue();
+
                             int startPos = event.getGuild().getRolesByName("NitroColorStart", false).get(0).getPosition(); //Gets the position of "NitroColorStart"
 
-                            event.getGuild().addRoleToMember(filteredJsonButFinal, Role).queue();
+                            event.getGuild().addRoleToMember(finalUserID, Role).queue();
                             event.getGuild().modifyRolePositions().selectPosition(Role).moveTo(startPos - 1).queue();
-
-                            ReadJSON.read("messages", "nitrocolornewrolesuccess", event);
+                            event.getGuild().modifyRolePositions(false).queue();
 
                         });
 
-            }
+            } else if (nitroColor && nitroBooster) {
+                
+                Color clr = event.getGuild().getRoleById(nitroColorID).getColor();
+                String userHex;
+                String jsonHex;
 
+                try {
+                    jsonHex = json.get(userID).getAsString();
+                    System.out.println(jsonHex);
+                } catch (NullPointerException e) {
+                    continue;
+                }
+
+                if (clr != null) { //Checks that the role has a colour
+                    userHex = String.format("%02x%02x%02x", clr.getRed(), clr.getGreen(), clr.getBlue()); //Converts color value from decimal to userHex
+                } else {
+                    userHex = "";
+                }
+
+                if (!userHex.equalsIgnoreCase(jsonHex)) {
+
+                    int hexindecimal = Integer.parseInt(jsonHex, 16); //converts it back
+                    event.getGuild().getRoleById(nitroColorID).getManager().setColor(hexindecimal).queue(); //Sets the colour
+
+                }
+
+            }
         }
+
     }
 
+    
     private void set(GuildMessageReceivedEvent event) {
 
         ManageJSON manageJson = new ManageJSON();
@@ -440,29 +467,6 @@ public class NitroColor {
             event.getChannel().sendMessage(e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**").queue();
             System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
             return;
-        }
-        
-        load();
-
-        Map<String, String> colorMap = new HashMap() {
-        };
-
-        String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
-
-        json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
-        json = json.replaceAll(":", " ");
-        json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
-        String[] filteredjson = json.split(" ");
-
-        for (String s : filteredjson) {
-            System.out.println(s);
-        }
-
-        for (int i = 0; i < filteredjson.length; i = i + 2) {
-
-            colorMap.put(filteredjson[i], (filteredjson[i + 1]));
-            System.out.println("filteeded: " + filteredjson[i] + (filteredjson[i + 1]));
-
         }
 
         String[] HEXArray = event.getMessage().getContentRaw().split(" ");
@@ -489,18 +493,40 @@ public class NitroColor {
             HEX = "000001"; //For some fucking reason 000000 gives none
         }
 
-        for (int i = 0; i < filteredjson.length; i = i + 2) {
+        updateJSON(); //Starts parsing file
+        Map<String, String> colorMap = new HashMap() {
+        };
 
-            if (HEX.equalsIgnoreCase(filteredjson[i + 1]) && String.valueOf(event.getAuthor().getIdLong()).equalsIgnoreCase(filteredjson[i])) {
+        String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
 
-                ReadJSON.read("messages", "nitrocolorduplicate", event);
-                return;
+        System.out.println("-" + json + "-");
+
+        if (!json.equals("{}")) {
+
+            json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
+            json = json.replaceAll(":", " ");
+            json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
+            String[] filteredjson = json.split(" ");
+
+            for (int i = 0; i < filteredjson.length; i = i + 2) {
+
+                colorMap.put(filteredjson[i], (filteredjson[i + 1]));
+
+            }
+
+            for (int i = 0; i < filteredjson.length; i = i + 2) {
+
+                if (HEX.equalsIgnoreCase(filteredjson[i + 1]) && String.valueOf(event.getAuthor().getIdLong()).equalsIgnoreCase(filteredjson[i])) {
+
+                    ReadJSON.read("messages", "nitrocolorduplicate", event);
+                    return;
+                }
+
             }
 
         }
 
         colorMap.put(event.getAuthor().getId(), HEX);
-
 
         try {
 
@@ -514,6 +540,7 @@ public class NitroColor {
 
             writer.close();
 
+            ReadJSON.read("messages", "nitrocolorsuccess", event);
             update(event);
 
         } catch (IOException e) {
@@ -538,30 +565,8 @@ public class NitroColor {
             System.out.println("<SWEPLOX UTILITIES> " + e + " @ VerifyCommand/Permissioncheck" + "\n**Check the config**");
             return;
         }
-        
-        load();
 
-        User = User.substring(3, 21); //Converts the userid into valid snowflake
-
-        Map<String, String> colorMap = new HashMap() {
-        };
-
-        try {
-            String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
-
-            json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
-            json = json.replaceAll(":", " ");
-            json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
-            String[] filteredjson = json.split(" ");
-
-            for (int i = 0; i < filteredjson.length; i = i + 2) {
-
-                colorMap.put(filteredjson[i], (filteredjson[i + 1]));
-            }
-
-        } catch (Exception e) {
- 
-        }
+        updateJSON();
 
         String[] HEXArray = event.getMessage().getContentRaw().split(" ");
 
@@ -576,7 +581,6 @@ public class NitroColor {
 
         String HEX = HEXArray[3].replaceAll("#", "");
 
-
         if (!HEX.matches("[0-9a-fA-F]{6}")) {
             ReadJSON.read("messages", "nitrocolorinvalidhex", event);
             return;
@@ -584,6 +588,37 @@ public class NitroColor {
 
         if (HEX.equalsIgnoreCase("000000")) {
             HEX = "000001"; //For some fucking reason 000000 gives none
+        }
+
+        User = User.substring(3, 21); //Converts the userid into valid snowflake
+
+        Map<String, String> colorMap = new HashMap() {
+        };
+
+        String json = JSONObject.getAsJsonObject().get("nitrocolor").toString();
+
+        if (!json.equals("{}")) {
+
+            json = json.replaceAll("[\\Q][(){}\".;!?<>%\\E]", "");
+            json = json.replaceAll(":", " ");
+            json = json.replaceAll(",", " "); //Filtering away everything and replaces " with space. i dont know regualar expressions let me be
+            String[] filteredjson = json.split(" ");
+
+            for (int i = 0; i < filteredjson.length; i = i + 2) {
+
+                colorMap.put(filteredjson[i], (filteredjson[i + 1]));
+            }
+
+            for (int i = 0; i < filteredjson.length; i = i + 2) {
+
+                if (HEX.equalsIgnoreCase(filteredjson[i + 1]) && String.valueOf(User).equalsIgnoreCase(filteredjson[i])) {
+
+                    ReadJSON.read("messages", "nitrocolorduplicate", event);
+                    return;
+                }
+
+            }
+
         }
 
         colorMap.put(User, HEX);
@@ -599,6 +634,8 @@ public class NitroColor {
             gson.toJson(preparedMap, writer);
 
             writer.close();
+
+            ReadJSON.read("messages", "nitrocolorsuccess", event);
 
             update(event);
 
